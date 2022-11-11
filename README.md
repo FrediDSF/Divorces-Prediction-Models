@@ -1,1 +1,1 @@
-# Divorces-Prediction-Models
+# Divorces Prediction Models
