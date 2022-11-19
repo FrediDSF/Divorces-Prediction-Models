@@ -1,0 +1,121 @@
+#DATA COLLECTION AND ACCUMULATION
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+
+
+Scheidungen = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_447.csv", sep=";")
+Scheidungen = Scheidungen[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]].iloc[:5477]
+Scheidungen
+
+Bevoelkerung = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_133.csv", sep=";")
+Bevoelkerung = Bevoelkerung[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]].iloc[:10500]
+Bevoelkerung
+
+M1 = pd.merge(Bevoelkerung, Scheidungen, how="left", on=["GEBIET_NAME","INDIKATOR_JAHR"])
+M1.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE_x":"Population", "INDIKATOR_VALUE_y":"Divorces"}, inplace = True)
+M1 = M1[["Place", "Year", "Population", "Divorces"]]
+M1
+M1["Divorces p1k"] = M1["Divorces"]/M1["Population"]*1000
+M1
+
+TaxInc = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_286.csv", sep=";").iloc[:5572]
+TaxInc =TaxInc[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+TaxInc.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Ø Taxable assets of natural persons [CHF 1k]"}, inplace = True)
+TaxInc = TaxInc[["Place", "Year", "Ø Taxable assets of natural persons [CHF 1k]"]]
+TaxInc
+
+M2 = pd.merge(M1, TaxInc, how="left", on=["Place","Year"])
+M2
+
+Unemp = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_107.csv", sep=";").iloc[:5284]
+Unemp =Unemp[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+Unemp.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Unemployed persons"}, inplace = True)
+Unemp = Unemp[["Place", "Year", "Unemployed persons"]]
+Unemp["Unemployed persons p1k"] = Unemp["Unemployed persons"]/M1["Population"]*1000/12
+Unemp = Unemp.dropna()
+Unemp
+
+M3 = pd.merge(M2, Unemp, how="left", on=["Place","Year"])
+M3
+
+SVP = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_125.csv", sep=";").iloc[:1356]
+SVP = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_125.csv", sep=";").iloc[:1356]
+SVP =SVP[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+SVP.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"% SVP voters"}, inplace = True)
+SVP = SVP[["Place", "Year", "% SVP voters"]]
+SVP
+
+M4 = pd.merge(M3, SVP, how="left", on=["Place","Year"])
+M4
+
+RVB = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_268.csv", sep=";").iloc[:3390]
+RVB =RVB[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+RVB.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Number of cattle"}, inplace = True)
+RVB = RVB[["Place", "Year", "Number of cattle"]]
+RVB
+
+M5 = pd.merge(M4, RVB, how="left", on=["Place","Year"])
+M5
+
+BQ = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_815.csv", sep=";").iloc[:1017]
+BQ =BQ[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+BQ.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Bezügerquote"}, inplace = True)
+BQ = BQ[["Place", "Year", "Bezügerquote"]]
+BQ
+
+M6 = pd.merge(M5, BQ, how="left", on=["Place","Year"])
+M6
+
+GR = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_97.csv", sep=";").iloc[:5480]
+GR = GR[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+GR.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Birthrate"}, inplace = True)
+GR = GR[["Place", "Year", "Birthrate"]]
+GR
+
+M7 = pd.merge(M6, GR, how="left", on=["Place","Year"])
+M7
+
+KSt = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_296.csv", sep=";").iloc[:5573]
+KSt = KSt[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+KSt.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Church tax (millions)"}, inplace = True)
+KSt = KSt[["Place", "Year", "Church tax (millions)"]]
+KSt
+
+M8 = pd.merge(M7, KSt, how="left", on=["Place","Year"])
+M8
+
+KG = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_144.csv", sep=";").iloc[:5311]
+KG = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_144.csv", sep=";").iloc[:5311]
+KG = KG[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+KG.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Number of kindergardeners p1k"}, inplace = True)
+KG = KG[["Place", "Year", "Number of kindergardeners p1k"]]
+KG
+
+M9 = pd.merge(M8, KG, how="left", on=["Place","Year"])
+M9
+
+PS = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_149.csv", sep=";").iloc[:5311]
+PS = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_149.csv", sep=";").iloc[:5311]
+PS = PS[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+PS.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Number of primary schoolers"}, inplace = True)
+PS = PS[["Place", "Year", "Number of primary schoolers"]]
+PS["Number of primary schoolers p1k"] = PS["Number of primary schoolers"]/M1["Population"]
+PS
+
+M10 = pd.merge(M9, PS, how="left", on=["Place","Year"])
+M10
+
+OS = pd.read_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Raw/KANTON_ZUERICH_147.csv", sep=";").iloc[:3419]
+OS = OS[["GEBIET_NAME", "INDIKATOR_NAME", "INDIKATOR_JAHR", "INDIKATOR_VALUE"]]
+OS.rename(columns = {'GEBIET_NAME':'Place', 'INDIKATOR_JAHR':'Year', "INDIKATOR_VALUE":"Number of secondary educationers"}, inplace = True)
+OS["Number of secondary educationers p1k"] = OS["Number of secondary educationers"]/M1["Population"]
+OS = OS[["Place", "Year", "Number of secondary educationers", "Number of secondary educationers p1k"]]
+OS
+
+M11 = pd.merge(M10, OS, how="left", on=["Place","Year"])
+M11
+M11.to_csv("/Users/frederickmangold/Data Science Projects/Divorce Predictive Models/Data/Processed/Raw_features_accumulated.csv", index=True)
