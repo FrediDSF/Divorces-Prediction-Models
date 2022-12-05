@@ -1,0 +1,1824 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "8342ce37-5261-4e67-81c1-6fb0c06a7c7c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from keras.models import Sequential #ANN \n",
+    "from keras.layers import Dense #ANN \n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "50cebb09-79bf-4f61-94cc-5a15d763eba6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df1 = pd.read_csv(\"https://raw.githubusercontent.com/FrediDSF/Divorces-Prediction-Models/main/Data/CH_Entire/Processed/Features_CH_accumulated_p1k.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "c6ca9370-8e2f-4e89-b8a9-9d4b78f7e179",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.set_printoptions(suppress=True) #Removes scientific notation from numpy arrays "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "f242993d-9b9d-4d10-8409-9248115eb420",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df1.drop(columns = [\"Unnamed: 0\"], inplace = True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "id": "0755131a-4571-42f8-aecc-2565d06debd9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Divorces_p1k</th>\n",
+       "      <th>Pre_school_p1k</th>\n",
+       "      <th>Primary_school_p1k</th>\n",
+       "      <th>Secondary_school_p1k</th>\n",
+       "      <th>SP</th>\n",
+       "      <th>CVP</th>\n",
+       "      <th>SVP</th>\n",
+       "      <th>Foreigners_p1k</th>\n",
+       "      <th>Cars_p1k</th>\n",
+       "      <th>Average_age_when_married</th>\n",
+       "      <th>Average_duration_of_marriage_when_divorced</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>2.687560</td>\n",
+       "      <td>23.699733</td>\n",
+       "      <td>62.028452</td>\n",
+       "      <td>51.348497</td>\n",
+       "      <td>21.7</td>\n",
+       "      <td>17.3</td>\n",
+       "      <td>21.9</td>\n",
+       "      <td>182.667177</td>\n",
+       "      <td>652.672116</td>\n",
+       "      <td>29.2</td>\n",
+       "      <td>12.964749</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1.433017</td>\n",
+       "      <td>23.540068</td>\n",
+       "      <td>61.610565</td>\n",
+       "      <td>51.002561</td>\n",
+       "      <td>21.7</td>\n",
+       "      <td>17.3</td>\n",
+       "      <td>21.9</td>\n",
+       "      <td>184.870275</td>\n",
+       "      <td>666.123467</td>\n",
+       "      <td>29.4</td>\n",
+       "      <td>14.385246</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1.935315</td>\n",
+       "      <td>23.201974</td>\n",
+       "      <td>59.836670</td>\n",
+       "      <td>50.092859</td>\n",
+       "      <td>18.6</td>\n",
+       "      <td>15.0</td>\n",
+       "      <td>33.5</td>\n",
+       "      <td>185.021570</td>\n",
+       "      <td>676.257228</td>\n",
+       "      <td>29.5</td>\n",
+       "      <td>13.528438</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>2.092547</td>\n",
+       "      <td>22.985631</td>\n",
+       "      <td>58.533742</td>\n",
+       "      <td>50.082586</td>\n",
+       "      <td>18.6</td>\n",
+       "      <td>15.0</td>\n",
+       "      <td>33.5</td>\n",
+       "      <td>190.259850</td>\n",
+       "      <td>700.116233</td>\n",
+       "      <td>29.8</td>\n",
+       "      <td>13.670864</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>2.188437</td>\n",
+       "      <td>22.166179</td>\n",
+       "      <td>57.204365</td>\n",
+       "      <td>50.771036</td>\n",
+       "      <td>18.6</td>\n",
+       "      <td>15.0</td>\n",
+       "      <td>33.5</td>\n",
+       "      <td>193.385104</td>\n",
+       "      <td>694.007569</td>\n",
+       "      <td>29.7</td>\n",
+       "      <td>13.958332</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Divorces_p1k  Pre_school_p1k  Primary_school_p1k  Secondary_school_p1k  \\\n",
+       "0      2.687560       23.699733           62.028452             51.348497   \n",
+       "1      1.433017       23.540068           61.610565             51.002561   \n",
+       "2      1.935315       23.201974           59.836670             50.092859   \n",
+       "3      2.092547       22.985631           58.533742             50.082586   \n",
+       "4      2.188437       22.166179           57.204365             50.771036   \n",
+       "\n",
+       "     SP   CVP   SVP  Foreigners_p1k    Cars_p1k  Average_age_when_married  \\\n",
+       "0  21.7  17.3  21.9      182.667177  652.672116                      29.2   \n",
+       "1  21.7  17.3  21.9      184.870275  666.123467                      29.4   \n",
+       "2  18.6  15.0  33.5      185.021570  676.257228                      29.5   \n",
+       "3  18.6  15.0  33.5      190.259850  700.116233                      29.8   \n",
+       "4  18.6  15.0  33.5      193.385104  694.007569                      29.7   \n",
+       "\n",
+       "   Average_duration_of_marriage_when_divorced  \n",
+       "0                                   12.964749  \n",
+       "1                                   14.385246  \n",
+       "2                                   13.528438  \n",
+       "3                                   13.670864  \n",
+       "4                                   13.958332  "
+      ]
+     },
+     "execution_count": 43,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df1.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "id": "7ab019c0-3a5c-4b6a-b433-7e545717d939",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "TargetVariable = [\"Divorces_p1k\"] #define the target value, equal to the divroce rate "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "a892f27a-a603-4909-8103-244397da4898",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "Predictors = [\"Pre_school_p1k\", \"Primary_school_p1k\", \"Secondary_school_p1k\", \"SP\", \"CVP\", \"SVP\", \"Foreigners_p1k\", \"Cars_p1k\", \"Average_duration_of_marriage_when_divorced\", \"Average_age_when_married\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "32ba0344-4aa1-4871-8a0a-e2f026fbb558",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X=df1[Predictors].values #map features onto x\n",
+    "y=df1[TargetVariable].values #set target value as your y-variable "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "id": "ee5ecdcf-85ea-4df5-9701-3eb775bc59cf",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(473, 1)"
+      ]
+     },
+     "execution_count": 47,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "y.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "809b1eda-6b12-4ae4-a1ba-50a48df9ac54",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Here I standardize the data\n",
+    "PredictorScaler=StandardScaler()\n",
+    "TargetVarScaler=StandardScaler()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "id": "50c4d5eb-0527-4885-b99c-f30ff5341dea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Here I store the fit objective for later usage \n",
+    "PredictorScalerFit=PredictorScaler.fit(X)\n",
+    "TargetVarScalerFit=TargetVarScaler.fit(y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "id": "7c24c6c6-88a4-4a72-88e5-1cd7b00fa78e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X=PredictorScalerFit.transform(X)\n",
+    "y=TargetVarScalerFit.transform(y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "id": "e918e365-e4d6-476d-8770-4a76d130d562",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Split the Data into testing and training, with a ratio of 70% to 30% \n",
+    "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "70b3d385-cafd-44af-aef0-e16162fc5401",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(331, 10)\n",
+      "(331, 1)\n",
+      "(142, 10)\n",
+      "(142, 1)\n"
+     ]
+    }
+   ],
+   "source": [
+    "#data check to make sure that 70% is in the traninig and 30% is in the testing \n",
+    "print(X_train.shape)\n",
+    "print(y_train.shape)\n",
+    "print(X_test.shape)\n",
+    "print(y_test.shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "b75ad9f6-4a50-4a9d-8eda-35c3c8d6d59a",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Epoch 1/50\n",
+      "67/67 [==============================] - 1s 4ms/step - loss: 1.1151\n",
+      "Epoch 2/50\n",
+      "67/67 [==============================] - 0s 4ms/step - loss: 1.0256\n",
+      "Epoch 3/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.7692\n",
+      "Epoch 4/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.7167\n",
+      "Epoch 5/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.6972\n",
+      "Epoch 6/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.6789\n",
+      "Epoch 7/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.6631\n",
+      "Epoch 8/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.6485\n",
+      "Epoch 9/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.6281\n",
+      "Epoch 10/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.6192\n",
+      "Epoch 11/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.6046\n",
+      "Epoch 12/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5989\n",
+      "Epoch 13/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5901\n",
+      "Epoch 14/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5735\n",
+      "Epoch 15/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.5733\n",
+      "Epoch 16/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.5594\n",
+      "Epoch 17/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5586\n",
+      "Epoch 18/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5504\n",
+      "Epoch 19/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5433\n",
+      "Epoch 20/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.5418\n",
+      "Epoch 21/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5295\n",
+      "Epoch 22/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5246\n",
+      "Epoch 23/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5256\n",
+      "Epoch 24/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.5179\n",
+      "Epoch 25/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5176\n",
+      "Epoch 26/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5118\n",
+      "Epoch 27/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5181\n",
+      "Epoch 28/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.5067\n",
+      "Epoch 29/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5035\n",
+      "Epoch 30/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5064\n",
+      "Epoch 31/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5122\n",
+      "Epoch 32/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4998\n",
+      "Epoch 33/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4997\n",
+      "Epoch 34/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.5008\n",
+      "Epoch 35/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4932\n",
+      "Epoch 36/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4979\n",
+      "Epoch 37/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4901\n",
+      "Epoch 38/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4906\n",
+      "Epoch 39/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4868\n",
+      "Epoch 40/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4864\n",
+      "Epoch 41/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4879\n",
+      "Epoch 42/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4880\n",
+      "Epoch 43/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4856\n",
+      "Epoch 44/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4819\n",
+      "Epoch 45/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4812\n",
+      "Epoch 46/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4778\n",
+      "Epoch 47/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4784\n",
+      "Epoch 48/50\n",
+      "67/67 [==============================] - 0s 2ms/step - loss: 0.4788\n",
+      "Epoch 49/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4833\n",
+      "Epoch 50/50\n",
+      "67/67 [==============================] - 0s 3ms/step - loss: 0.4770\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "<keras.callbacks.History at 0x7f9a803f5ac0>"
+      ]
+     },
+     "execution_count": 53,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# create ANN model with random guess concering the batch size and epochs, box after will show how to optimize it \n",
+    "model = Sequential()\n",
+    " \n",
+    "# Defining the Input layer, the first layer \n",
+    "model.add(Dense(units=7, input_dim=10, kernel_initializer='normal', activation='relu'))\n",
+    " \n",
+    "# Defining the Second layer of the model\n",
+    "# after the first layer we don't have to specify input_dim as keras configure it automatically using a relu activation function \n",
+    "model.add(Dense(units=8, kernel_initializer='normal', activation='tanh'))\n",
+    "\n",
+    "model.add(Dense(units=8, kernel_initializer='normal', activation='tanh'))\n",
+    "\n",
+    "model.add(Dense(units=8, kernel_initializer='normal', activation='tanh'))\n",
+    " \n",
+    "# The output neuron is a single fully connected node \n",
+    "# Since we will be predicting a single number\n",
+    "model.add(Dense(1, kernel_initializer='normal'))\n",
+    " \n",
+    "# Compiling the model\n",
+    "model.compile(loss='mean_squared_error', optimizer='adam')\n",
+    " \n",
+    "# Fitting the ANN to the Training set\n",
+    "model.fit(X_train, y_train ,batch_size = 5, epochs = 50, verbose=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "id": "4e536c08-e844-4663-a23d-dda772a11836",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "1 Parameters: batch_size: 5 - epochs: 5 Accuracy: -19.852682845650605\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "2 Parameters: batch_size: 5 - epochs: 10 Accuracy: -18.45241308365162\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 3ms/step\n",
+      "3 Parameters: batch_size: 5 - epochs: 20 Accuracy: 5.811572078930951\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "4 Parameters: batch_size: 5 - epochs: 40 Accuracy: 56.439277594777366\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "5 Parameters: batch_size: 5 - epochs: 50 Accuracy: -55.42102973536771\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 3ms/step\n",
+      "6 Parameters: batch_size: 5 - epochs: 100 Accuracy: 26.0461423608091\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "7 Parameters: batch_size: 10 - epochs: 5 Accuracy: 148.60055699634603\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "8 Parameters: batch_size: 10 - epochs: 10 Accuracy: -1.4270635125750317\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "9 Parameters: batch_size: 10 - epochs: 20 Accuracy: -30.59011262709228\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "10 Parameters: batch_size: 10 - epochs: 40 Accuracy: 25.233535479646434\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "11 Parameters: batch_size: 10 - epochs: 50 Accuracy: -44.259590491052705\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "12 Parameters: batch_size: 10 - epochs: 100 Accuracy: 42.00163168026035\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "13 Parameters: batch_size: 15 - epochs: 5 Accuracy: 102.78275385338122\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "14 Parameters: batch_size: 15 - epochs: 10 Accuracy: 4.053339941871229\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 4ms/step\n",
+      "15 Parameters: batch_size: 15 - epochs: 20 Accuracy: 0.38479745907960705\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "16 Parameters: batch_size: 15 - epochs: 40 Accuracy: 50.09136701421276\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "17 Parameters: batch_size: 15 - epochs: 50 Accuracy: 20.741173751584796\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "18 Parameters: batch_size: 15 - epochs: 100 Accuracy: 86.73977630642754\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "19 Parameters: batch_size: 20 - epochs: 5 Accuracy: 96.21860312445004\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "20 Parameters: batch_size: 20 - epochs: 10 Accuracy: 97.52495188627432\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 3ms/step\n",
+      "21 Parameters: batch_size: 20 - epochs: 20 Accuracy: 79.96132430299046\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 3ms/step\n",
+      "22 Parameters: batch_size: 20 - epochs: 40 Accuracy: -16.81021228337346\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "23 Parameters: batch_size: 20 - epochs: 50 Accuracy: 29.286258094608087\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "24 Parameters: batch_size: 20 - epochs: 100 Accuracy: 82.27240385984017\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "25 Parameters: batch_size: 25 - epochs: 5 Accuracy: 101.91283229270512\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "26 Parameters: batch_size: 25 - epochs: 10 Accuracy: 45.93046662580635\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "27 Parameters: batch_size: 25 - epochs: 20 Accuracy: -10.549782888576999\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "28 Parameters: batch_size: 25 - epochs: 40 Accuracy: 90.48113664935833\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "29 Parameters: batch_size: 25 - epochs: 50 Accuracy: -28.276887583192376\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "30 Parameters: batch_size: 25 - epochs: 100 Accuracy: 84.32407260837101\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "31 Parameters: batch_size: 30 - epochs: 5 Accuracy: 99.18686342105448\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "32 Parameters: batch_size: 30 - epochs: 10 Accuracy: 80.6662037735942\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "33 Parameters: batch_size: 30 - epochs: 20 Accuracy: 43.283398389766546\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "34 Parameters: batch_size: 30 - epochs: 40 Accuracy: -10.574778245353585\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "35 Parameters: batch_size: 30 - epochs: 50 Accuracy: -21.266817288569882\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "36 Parameters: batch_size: 30 - epochs: 100 Accuracy: -15.130315024855676\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "37 Parameters: batch_size: 35 - epochs: 5 Accuracy: 99.6982000629398\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "38 Parameters: batch_size: 35 - epochs: 10 Accuracy: 105.2948304746007\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "39 Parameters: batch_size: 35 - epochs: 20 Accuracy: 12.127381254130327\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "40 Parameters: batch_size: 35 - epochs: 40 Accuracy: -30.76087949036537\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "41 Parameters: batch_size: 35 - epochs: 50 Accuracy: 34.40181440918103\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "42 Parameters: batch_size: 35 - epochs: 100 Accuracy: 69.43664750631119\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "43 Parameters: batch_size: 40 - epochs: 5 Accuracy: 102.5805077864718\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "44 Parameters: batch_size: 40 - epochs: 10 Accuracy: 102.49890551461525\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 4ms/step\n",
+      "45 Parameters: batch_size: 40 - epochs: 20 Accuracy: -0.15187039381446255\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "46 Parameters: batch_size: 40 - epochs: 40 Accuracy: -38.66349342869333\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "47 Parameters: batch_size: 40 - epochs: 50 Accuracy: -29.279231287466303\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 1ms/step\n",
+      "48 Parameters: batch_size: 40 - epochs: 100 Accuracy: -45.5422532681049\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/tmp/ipykernel_951/3595864070.py:43: FutureWarning: The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.\n",
+      "  SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n"
+     ]
+    }
+   ],
+   "source": [
+    "#rathen than randomly estimating the optimal batch size and number of epochs, I run a set of number combinations \n",
+    "#determine the optimal value\n",
+    "\n",
+    "def FunctionFindBestParams(X_train, y_train, X_test, y_test):\n",
+    "# Defining the list of hyper parameters to try\n",
+    "    batch_size_list=[5, 10, 15, 20, 25, 30, 35, 40]\n",
+    "    epoch_list  =   [5, 10, 20, 40, 50, 100]\n",
+    "    \n",
+    "    SearchResultsData=pd.DataFrame(columns=['TrialNumber', 'Parameters', 'Accuracy'])\n",
+    "    \n",
+    "    # initializing the trials\n",
+    "    TrialNumber=0\n",
+    "    for batch_size_trial in batch_size_list:\n",
+    "        for epochs_trial in epoch_list:\n",
+    "            TrialNumber+=1\n",
+    "            # create ANN model\n",
+    "            model = Sequential()\n",
+    "            # Defining the first layer of the model\n",
+    "            model.add(Dense(units=8, input_dim=X_train.shape[1], kernel_initializer='normal', activation='relu'))\n",
+    " \n",
+    "            # Defining the Second and Third layer and Fourth of the model\n",
+    "            model.add(Dense(units=8, kernel_initializer='normal', activation='relu'))\n",
+    "            \n",
+    "            model.add(Dense(units=8, kernel_initializer='normal', activation='relu'))\n",
+    "\n",
+    "            model.add(Dense(units=8, kernel_initializer='normal', activation='relu'))\n",
+    "\n",
+    "            # The output neuron is a single fully connected node \n",
+    "            # Since we will be predicting a single number\n",
+    "            model.add(Dense(1, kernel_initializer='normal'))\n",
+    " \n",
+    "            # Compiling the model\n",
+    "            model.compile(loss='mean_squared_error', optimizer='adam')\n",
+    " \n",
+    "            # Fitting the ANN to the Training set\n",
+    "            model.fit(X_train, y_train ,batch_size = batch_size_trial, epochs = epochs_trial, verbose=0)\n",
+    " \n",
+    "            MAPE = np.mean(100 * (np.abs(y_test-model.predict(X_test))/y_test))\n",
+    "            \n",
+    "            # printing the results of the current iteration\n",
+    "            print(TrialNumber, 'Parameters:','batch_size:', batch_size_trial,'-', 'epochs:',epochs_trial, 'Accuracy:', 100-MAPE)\n",
+    "            \n",
+    "            SearchResultsData=SearchResultsData.append(pd.DataFrame(data=[[TrialNumber, str(batch_size_trial)+'-'+str(epochs_trial), 100-MAPE]],\n",
+    "                                                                    columns=['TrialNumber', 'Parameters', 'Accuracy'] ))\n",
+    "    return(SearchResultsData)\n",
+    " \n",
+    " \n",
+    "ResultsData=FunctionFindBestParams(X_train, y_train, X_test, y_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "id": "86f0b272-b28a-44e6-913e-fc3e96dbeaee",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Text(0.5, 1.0, 'Function of Best Parameters Combination, Batch Size and Epochs')"
+      ]
+     },
+     "execution_count": 56,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 1080x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "#plot a graph with results above using the performance indicator MAPE\n",
+    "%matplotlib inline\n",
+    "ResultsData.plot(x='Parameters', y='Accuracy', figsize=(15,4), kind='line', color=\"#6171D3\")\n",
+    "\n",
+    "plt.axhline(y=100, color='r', linestyle='-')\n",
+    "plt.ylabel(\"100-MAPE\", fontsize = 10)\n",
+    "plt.xlabel(\"Parameters (Batch Size - Epochs)\", fontsize = 10)\n",
+    "plt.title(\"Function of Best Parameters Combination, Batch Size and Epochs\",  fontsize = 10, fontweight = \"bold\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "id": "f65bd739-8fd1-44a2-999f-89de06f88c75",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "5/5 [==============================] - 0s 2ms/step\n",
+      "11/11 [==============================] - 0s 1ms/step\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Pre_school_p1k</th>\n",
+       "      <th>Primary_school_p1k</th>\n",
+       "      <th>Secondary_school_p1k</th>\n",
+       "      <th>SP</th>\n",
+       "      <th>CVP</th>\n",
+       "      <th>SVP</th>\n",
+       "      <th>Foreigners_p1k</th>\n",
+       "      <th>Cars_p1k</th>\n",
+       "      <th>Average_duration_of_marriage_when_divorced</th>\n",
+       "      <th>Average_age_when_married</th>\n",
+       "      <th>Actual Divorces</th>\n",
+       "      <th>Predicted Divorces</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>16.652652</td>\n",
+       "      <td>27.951335</td>\n",
+       "      <td>41.000969</td>\n",
+       "      <td>28.2</td>\n",
+       "      <td>9.3</td>\n",
+       "      <td>13.9</td>\n",
+       "      <td>305.389094</td>\n",
+       "      <td>437.253191</td>\n",
+       "      <td>12.719219</td>\n",
+       "      <td>31.3</td>\n",
+       "      <td>2.948408</td>\n",
+       "      <td>2.298339</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>15.774872</td>\n",
+       "      <td>63.163567</td>\n",
+       "      <td>33.959517</td>\n",
+       "      <td>26.1</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>31.8</td>\n",
+       "      <td>121.732389</td>\n",
+       "      <td>661.264112</td>\n",
+       "      <td>13.591797</td>\n",
+       "      <td>29.5</td>\n",
+       "      <td>2.093582</td>\n",
+       "      <td>2.345849</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>17.817935</td>\n",
+       "      <td>45.037846</td>\n",
+       "      <td>40.701574</td>\n",
+       "      <td>22.9</td>\n",
+       "      <td>12.1</td>\n",
+       "      <td>22.5</td>\n",
+       "      <td>184.179756</td>\n",
+       "      <td>671.751920</td>\n",
+       "      <td>15.271556</td>\n",
+       "      <td>30.7</td>\n",
+       "      <td>2.213955</td>\n",
+       "      <td>2.277457</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>18.245945</td>\n",
+       "      <td>59.181293</td>\n",
+       "      <td>30.882026</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>36.6</td>\n",
+       "      <td>24.6</td>\n",
+       "      <td>110.475450</td>\n",
+       "      <td>722.589425</td>\n",
+       "      <td>14.224969</td>\n",
+       "      <td>30.1</td>\n",
+       "      <td>1.138636</td>\n",
+       "      <td>1.445911</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>17.134030</td>\n",
+       "      <td>53.802281</td>\n",
+       "      <td>29.515209</td>\n",
+       "      <td>4.8</td>\n",
+       "      <td>29.1</td>\n",
+       "      <td>29.1</td>\n",
+       "      <td>130.180608</td>\n",
+       "      <td>807.081749</td>\n",
+       "      <td>16.771159</td>\n",
+       "      <td>32.0</td>\n",
+       "      <td>1.948669</td>\n",
+       "      <td>1.443570</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Pre_school_p1k  Primary_school_p1k  Secondary_school_p1k    SP   CVP   SVP  \\\n",
+       "0       16.652652           27.951335             41.000969  28.2   9.3  13.9   \n",
+       "1       15.774872           63.163567             33.959517  26.1   1.0  31.8   \n",
+       "2       17.817935           45.037846             40.701574  22.9  12.1  22.5   \n",
+       "3       18.245945           59.181293             30.882026   0.0  36.6  24.6   \n",
+       "4       17.134030           53.802281             29.515209   4.8  29.1  29.1   \n",
+       "\n",
+       "   Foreigners_p1k    Cars_p1k  Average_duration_of_marriage_when_divorced  \\\n",
+       "0      305.389094  437.253191                                   12.719219   \n",
+       "1      121.732389  661.264112                                   13.591797   \n",
+       "2      184.179756  671.751920                                   15.271556   \n",
+       "3      110.475450  722.589425                                   14.224969   \n",
+       "4      130.180608  807.081749                                   16.771159   \n",
+       "\n",
+       "   Average_age_when_married  Actual Divorces  Predicted Divorces  \n",
+       "0                      31.3         2.948408            2.298339  \n",
+       "1                      29.5         2.093582            2.345849  \n",
+       "2                      30.7         2.213955            2.277457  \n",
+       "3                      30.1         1.138636            1.445911  \n",
+       "4                      32.0         1.948669            1.443570  "
+      ]
+     },
+     "execution_count": 58,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Fitting the ANN to the Training set using the optimal combination of parameters detemrined abov\n",
+    "#these change slighly each round as the data in the training set is not always the same \n",
+    "\n",
+    "model.fit(X_train, y_train ,batch_size = 30, epochs = 5, verbose=0)\n",
+    " \n",
+    "# Generating Predictions on testing data\n",
+    "Predictions=model.predict(X_test)\n",
+    " \n",
+    "# Scaling the predicted Price data back to original divorce scale\n",
+    "Predictions=TargetVarScalerFit.inverse_transform(Predictions)\n",
+    " \n",
+    "# Scaling the y_test Price data back to original divorce scale\n",
+    "y_test_orig=TargetVarScalerFit.inverse_transform(y_test)\n",
+    "\n",
+    "#relates to adapting and reverting the train data back to divorce scale \n",
+    "y_train_orig=TargetVarScalerFit.inverse_transform(y_train)\n",
+    "Predictions_Train = model.predict(X_train)\n",
+    "Predictions_Train = TargetVarScalerFit.inverse_transform(Predictions_Train)\n",
+    "\n",
+    "\n",
+    "# Scaling the test data back to original scale\n",
+    "Test_Data=PredictorScalerFit.inverse_transform(X_test)\n",
+    "\n",
+    "#create a new df with the actual divorces rates and the predicted divorces determined by the testing data set\n",
+    "TestingData=pd.DataFrame(data=Test_Data, columns=Predictors)\n",
+    "TestingData['Actual Divorces']=y_test_orig\n",
+    "TestingData['Predicted Divorces']=Predictions\n",
+    "TestingData.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "3e12e44a-1fd4-4774-bb92-2e157b578fa9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Pre_school_p1k</th>\n",
+       "      <th>Primary_school_p1k</th>\n",
+       "      <th>Secondary_school_p1k</th>\n",
+       "      <th>SP</th>\n",
+       "      <th>CVP</th>\n",
+       "      <th>SVP</th>\n",
+       "      <th>Foreigners_p1k</th>\n",
+       "      <th>Cars_p1k</th>\n",
+       "      <th>Average_duration_of_marriage_when_divorced</th>\n",
+       "      <th>Average_age_when_married</th>\n",
+       "      <th>Actual Divorces</th>\n",
+       "      <th>Predicted Divorces Train</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>17.064802</td>\n",
+       "      <td>54.389963</td>\n",
+       "      <td>32.898528</td>\n",
+       "      <td>23.0</td>\n",
+       "      <td>5.1</td>\n",
+       "      <td>32.6</td>\n",
+       "      <td>226.557180</td>\n",
+       "      <td>712.308136</td>\n",
+       "      <td>14.635501</td>\n",
+       "      <td>29.8</td>\n",
+       "      <td>2.291896</td>\n",
+       "      <td>2.523898</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>18.661937</td>\n",
+       "      <td>53.487559</td>\n",
+       "      <td>29.904067</td>\n",
+       "      <td>11.5</td>\n",
+       "      <td>8.9</td>\n",
+       "      <td>28.8</td>\n",
+       "      <td>224.742680</td>\n",
+       "      <td>767.437794</td>\n",
+       "      <td>15.382804</td>\n",
+       "      <td>30.1</td>\n",
+       "      <td>1.998601</td>\n",
+       "      <td>1.848017</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>20.600953</td>\n",
+       "      <td>50.911013</td>\n",
+       "      <td>44.582790</td>\n",
+       "      <td>24.8</td>\n",
+       "      <td>13.0</td>\n",
+       "      <td>15.9</td>\n",
+       "      <td>172.345208</td>\n",
+       "      <td>633.244469</td>\n",
+       "      <td>14.992123</td>\n",
+       "      <td>29.6</td>\n",
+       "      <td>1.973767</td>\n",
+       "      <td>2.569679</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>20.166559</td>\n",
+       "      <td>53.081611</td>\n",
+       "      <td>48.887203</td>\n",
+       "      <td>19.7</td>\n",
+       "      <td>17.5</td>\n",
+       "      <td>30.3</td>\n",
+       "      <td>199.163902</td>\n",
+       "      <td>712.864880</td>\n",
+       "      <td>15.272013</td>\n",
+       "      <td>29.9</td>\n",
+       "      <td>2.806130</td>\n",
+       "      <td>2.465055</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>19.383441</td>\n",
+       "      <td>65.024852</td>\n",
+       "      <td>33.464509</td>\n",
+       "      <td>8.3</td>\n",
+       "      <td>29.0</td>\n",
+       "      <td>21.3</td>\n",
+       "      <td>193.287568</td>\n",
+       "      <td>725.419161</td>\n",
+       "      <td>15.167552</td>\n",
+       "      <td>30.0</td>\n",
+       "      <td>2.216645</td>\n",
+       "      <td>2.012917</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Pre_school_p1k  Primary_school_p1k  Secondary_school_p1k    SP   CVP   SVP  \\\n",
+       "0       17.064802           54.389963             32.898528  23.0   5.1  32.6   \n",
+       "1       18.661937           53.487559             29.904067  11.5   8.9  28.8   \n",
+       "2       20.600953           50.911013             44.582790  24.8  13.0  15.9   \n",
+       "3       20.166559           53.081611             48.887203  19.7  17.5  30.3   \n",
+       "4       19.383441           65.024852             33.464509   8.3  29.0  21.3   \n",
+       "\n",
+       "   Foreigners_p1k    Cars_p1k  Average_duration_of_marriage_when_divorced  \\\n",
+       "0      226.557180  712.308136                                   14.635501   \n",
+       "1      224.742680  767.437794                                   15.382804   \n",
+       "2      172.345208  633.244469                                   14.992123   \n",
+       "3      199.163902  712.864880                                   15.272013   \n",
+       "4      193.287568  725.419161                                   15.167552   \n",
+       "\n",
+       "   Average_age_when_married  Actual Divorces  Predicted Divorces Train  \n",
+       "0                      29.8         2.291896                  2.523898  \n",
+       "1                      30.1         1.998601                  1.848017  \n",
+       "2                      29.6         1.973767                  2.569679  \n",
+       "3                      29.9         2.806130                  2.465055  \n",
+       "4                      30.0         2.216645                  2.012917  "
+      ]
+     },
+     "execution_count": 59,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Careful this maps the predicitons of the training data set and not the testing, used to calculate the MAE for the training dataset\n",
+    "Test_Data1=PredictorScalerFit.inverse_transform(X_train)\n",
+    "\n",
+    "TestingData1=pd.DataFrame(data=Test_Data1, columns=Predictors)\n",
+    "TestingData1['Actual Divorces']= y_train_orig\n",
+    "TestingData1['Predicted Divorces Train']= Predictions_Train\n",
+    "TestingData1.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "69031431-6b4b-4843-9301-ac94160368c4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Create a new column with the absolute percentage error, using the formula mentioed below.\n",
+    "APE=100*(abs(TestingData['Actual Divorces']-TestingData['Predicted Divorces'])/TestingData['Actual Divorces'])\n",
+    "TestingData['APE']=APE\n",
+    "\n",
+    "print('The Accuracy of ANN model is:', 100-np.mean(APE))\n",
+    "TestingData"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8a7ee3c1-7e8a-4c8e-867b-5dfb7f09ccbf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Compute the MAE of our new model\n",
+    "mae2_Test = np.mean(np.abs(TestingData[\"Actual Divorces\"] - TestingData[\"Predicted Divorces\"]))\n",
+    "mae2_Test # Display the MAE Test Data Set "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bd7c3b90-2f89-4f28-a07d-6e6b671f20e9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mae2_Train = np.mean(np.abs(TestingData1[\"Actual Divorces\"] - TestingData1[\"Predicted Divorces Train\"]))\n",
+    "mae2_Train # Display the MAE Train Data Set  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "75eaf011-5f8e-42e8-b05d-b4e00ec70833",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.metrics import r2_score #alllows for the computation of the r2 score "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1e31d8ee-0ab4-4893-ad19-394e54310cfd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "PredictionsTest_y=model.predict(X_test)\n",
+    "\n",
+    "PredictionsTrain_y=model.predict(X_train)\n",
+    "\n",
+    "r2_train = r2_score(y_train, PredictionsTrain_y)\n",
+    "r2_train"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a0e16117-506d-46c7-a55b-d7799a83c0c1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "r2_test = r2_score(y_test, PredictionsTest_y)\n",
+    "r2_test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "37fdf4c5-3c11-4298-889f-0288f4336ddb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#the graph blow uses the computated values for the MAE and R2 Score and shows then in tow figures. \n",
+    "import matplotlib.font_manager as font_manager\n",
+    "\n",
+    "fig, axs = plt.subplots(1, 2, figsize=(9, 5))\n",
+    "width = .75 # Bar width\n",
+    "\n",
+    "axs[0].bar(0, mae2_Train, width, color=\"#6171D3\")\n",
+    "axs[1].bar(0 + width, r2_train, width, color=\"#6171D3\")\n",
+    "axs[0].bar(1, mae2_Test, width, color=\"#6171D3\")\n",
+    "axs[1].bar(1 + width, r2_test, width, color=\"#6171D3\")\n",
+    "\n",
+    "\n",
+    "# Plot titles\n",
+    "axs[0].set_title(\"Mean Absolute Error\", fontsize = 10, fontweight = \"bold\")\n",
+    "axs[1].set_title(\"R²\", fontsize = 10, fontweight = \"bold\")\n",
+    "\n",
+    "axs[0].set_xlabel(\"Training and Testing Models\", fontsize = 10)\n",
+    "axs[0].set_ylabel(\"Mean Absolute Error\", fontsize = 10)\n",
+    "axs[1].set_xlabel(\"Training and Testing Models\", fontsize = 10)\n",
+    "axs[1].set_ylabel(\"R squared\", fontsize = 10)\n",
+    "\n",
+    "\n",
+    "x = [0, 1]\n",
+    "axs[0].set_xticks(x)\n",
+    "axs[0].set_xticklabels([\"Train\",\"Test\"]) \n",
+    "\n",
+    "s = [0.75, 1.75]\n",
+    "axs[1].set_xticks(s)\n",
+    "axs[1].set_xticklabels([\"Train\",\"Test\"]) \n",
+    "\n",
+    "    \n",
+    "font = font_manager.FontProperties(size=10)         "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
